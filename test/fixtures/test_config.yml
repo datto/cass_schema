@@ -2,6 +2,15 @@ datastores:
   test_datastore:
     hosts: 127.0.0.1
     port: 9242
-  test2:
-    hosts: 127.0.0.1,127.0.0.1
+    keyspace: test_keyspace
+    replication: "{ 'class' : 'SimpleStrategy', 'replication_factor' : 1 }"
+  invalid_datastore:
+    hosts: 127.0.0.1
     port: 9242
+    keyspace: test_keyspace_invalid
+    replication: "{ 'class' : 'SimpleStrategy', 'replication_factor' : 1 }"
+  missing_datastore:
+    hosts: 127.0.0.1
+    port: 9242
+    keyspace: test_keyspace_invalid
+    replication: "{ 'class' : 'SimpleStrategy', 'replication_factor' : 1 }"
