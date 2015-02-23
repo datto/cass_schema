@@ -73,7 +73,7 @@ module CassSchema
     end
 
     def log(msg, level = :info)
-      Runner.logger.try { |l| l.send(:level, msg) }
+      Runner.logger.try { |l| l.send(level, msg) }
     end
   end
 
