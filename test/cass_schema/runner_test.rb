@@ -4,7 +4,7 @@ module CassSchema
   class RunnerTest < MiniTest::Should::TestCase
 
     setup do
-      base_path = '../fixtures'
+      base_path = "#{File.dirname(__FILE__)}/../fixtures"
       Runner.datastores = YamlHelper.datastores(File.join(base_path, 'test_config.yml'))
       Runner.schema_base_path = base_path
     end

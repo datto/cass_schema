@@ -4,14 +4,20 @@ require 'active_support/core_ext/hash'
 require 'active_support/core_ext/object'
 
 module CassSchema
-  DataStore = Struct.new(:name, :hosts, :port, :keyspace, :replication) do
+  Cluster = Struct.new(:hosts, :port) do
+    def self.build(hash)
+      l = hash.with_indifferent_access
+      new(l[:hosts], l[:port])
+    end
+  end
+
+  DataStore = Struct.new(:name, :cluster, :keyspace, :replication) do
 
     # Creates a datastore object from a hash containing the required keys
-    def self.create(name, hash)
+    def self.build(name, hash)
       l = hash.with_indifferent_access
-      new(name, l[:hosts], l[:port], l[:keyspace], l[:replication])
+      new(name, l[:cluster], l[:keyspace], l[:replication])
     end
-
 
     def create
       run_statement(create_keyspace, general_client)
@@ -30,16 +36,16 @@ module CassSchema
 
     def client
       @client ||= begin
-                    cluster = Cassandra.cluster(:hosts => hosts, :port => port)
-                    cluster.connect(keyspace)
+                    cl = Cassandra.cluster(:hosts => cluster.hosts, :port => cluster.port)
+                    cl.connect(keyspace)
                   end
     end
 
     def general_client
       @general_client ||= begin
-                    cluster = Cassandra.cluster(:hosts => hosts, :port => port)
-                    cluster.connect
-                  end
+                            cl = Cassandra.cluster(:hosts => cluster.hosts, :port => cluster.port)
+                            cl.connect
+                          end
     end
 
     def run_statement(statement, client)

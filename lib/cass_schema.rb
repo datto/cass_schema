@@ -1,5 +1,6 @@
 require 'cass_schema/version'
 require 'cass_schema/runner'
+require 'cass_schema/datastore'
 require 'cass_schema/yaml_helper'
 
 module CassSchema; end
