@@ -44,9 +44,19 @@ The contents of each cql file should be a list of CQL statements. Comments start
 
 schema.cql and each migration should be maintained by hand. It is recommended that schema.cql contain a complete list of CQL statements for the entire, up-to-date schema.
 
-An example yml config and datastore schema definition are in the test/fixtures directory.
+An example yml config and datastore schema definition are in the `test/fixtures` directory.
 
-### Running migrations
+### Rake tasks
+
+The file `lib/cass_schema/tasks/schema.rake` defines several rake tasks for schema management. In a Rails project, these tasks are loaded when cass_schema is first loaded.
+
+* `rake cass:schema:create_all` - create all schemas
+* `rake cass:schema:drop_all` - drop all schemas
+* `rake cass:schema:create[datastore]` - create the schema for the datastore named 'datastore'
+* `rake cass:schema:drop[datastore]` - drop the schema for the datastore named 'datastore'
+* `rake cass:schema:migrate[datastore, migration]` - run the migration 'migration' for the datastore 'datastore'
+
+### Ruby Library Usage
 
 To create all datastore schemas:
 
