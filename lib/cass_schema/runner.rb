@@ -3,7 +3,7 @@ require 'cassandra'
 module CassSchema
   class Runner
     class << self
-      attr_accessor :datastores
+      attr_writer :datastores
       attr_writer :schema_base_path
       attr_accessor :logger
 
@@ -47,10 +47,9 @@ module CassSchema
 
       private
 
-      def with_error_handling(statement)
-        yield
-      rescue => e
-        Error.new(e, statement)
+      def datastores
+        raise "CassSchema::Runner.datastores must be initialized to a list of CassSchema::DataStore objects!" unless @datastores
+        @datastores
       end
     end
   end
