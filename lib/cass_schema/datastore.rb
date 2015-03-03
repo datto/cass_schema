@@ -11,12 +11,13 @@ module CassSchema
     end
   end
 
-  DataStore = Struct.new(:name, :cluster, :keyspace, :replication) do
+  DataStore = Struct.new(:name, :cluster, :keyspace, :replication, :schema) do
 
     # Creates a datastore object from a hash containing the required keys
     def self.build(name, hash)
       l = hash.with_indifferent_access
-      new(name, l[:cluster], l[:keyspace], l[:replication])
+      schema = l[:schema] || name
+      new(name, l[:cluster], l[:keyspace], l[:replication], schema)
     end
 
     def create
@@ -57,11 +58,11 @@ module CassSchema
     end
 
     def create_statements
-      StatementLoader.statements(name, 'schema.cql')
+      StatementLoader.statements(schema, 'schema.cql')
     end
 
     def migration_statements(migration_name)
-      StatementLoader.statements(name, 'migrations', "#{migration_name}.cql")
+      StatementLoader.statements(schema, 'migrations', "#{migration_name}.cql")
     end
 
     def create_keyspace
@@ -79,12 +80,12 @@ module CassSchema
 
   class StatementLoader
     class << self
-      def path_for_datastore(datastore_name)
-        File.join(Runner.schema_base_path, datastore_name)
+      def path_for_schema(schema)
+        File.join(Runner.schema_base_path, schema)
       end
 
-      def statements(datastore_name, *path_parts)
-        file_path = File.join(path_for_datastore(datastore_name), path_parts)
+      def statements(schema, *path_parts)
+        file_path = File.join(path_for_schema(schema), path_parts)
         file = File.open(file_path).read
 
         # Parse the individual CQL statements as a list from the file. To do so:

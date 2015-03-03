@@ -41,6 +41,16 @@ module CassSchema
       should 'raise an error if a datastore does not exist' do
         assert_raises(ArgumentError) { Runner.create('nonexistent_datastore') }
       end
+
+      should 'be able to create a schema for which the schema name differs from the datastore name' do
+        datastore = Runner.datastore_lookup('test_datastore')
+        datastore.schema = 'test2'
+        Runner.create('test_datastore')
+        tables = tables_for_keyspace('test_keyspace')
+        assert_equal %w(test_other test_other2).to_set, tables.map { |t| t['columnfamily_name'] }.to_set
+
+        datastore.schema = 'test_datastore'
+      end
     end
 
     context 'dropping a schema' do

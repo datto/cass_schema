@@ -1,13 +1,11 @@
-CREATE KEYSPACE test2 with replication = { 'class' : 'SimpleStrategy', 'replication_factor' : 1 }
-
-CREATE TABLE test2.test(
+CREATE TABLE test_other(
   id text,
   a text,
   b text,
   PRIMARY KEY(id, a))
 
 # Comment
-CREATE TABLE test2.test2(
+CREATE TABLE test_other2(
   id text,
   x text,
   y text,
