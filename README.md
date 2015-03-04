@@ -1,6 +1,6 @@
 # CassSchema
 
-A gem for managing multiple cassandra schemas across multiple clusters. CassSchema supports loading a table schema from scratch, as well as running a migration to apply a change to the schema. Unlike some other database migration tools, there is no stored state about which migrations have and have not been run. -- a migration is simply a CQL statement to be run against the database.
+A gem for managing multiple cassandra schemas across multiple clusters. CassSchema supports loading a table schema from scratch, as well as running a migration to apply a change to the schema. Unlike some other database migration tools, there is no stored state about which migrations have and have not been run -- a migration is simply a CQL statement to be run against the database.
 
 CassSchema operations apply to multiple 'datastores'. A datastore is a cluster, keyspace pair, so there may be multiple schemas for a single cluster, but only a single schema for a given cluster plus keyspace.
 
