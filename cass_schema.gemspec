@@ -9,7 +9,7 @@ Gem::Specification.new do |spec|
   spec.authors       = ["Arron Norwell"]
   spec.email         = ["anorwell@gmail.com"]
   spec.summary       = %q{Manage Cassandra Schemas for multiple conceptual datastores.}
-  spec.description   = %q{TODO: Write a longer description. Optional.}
+  spec.description   = %q{A gem for managing the schema multiple Cassandra instances}
   spec.homepage      = ""
   spec.license       = "MIT"
 
