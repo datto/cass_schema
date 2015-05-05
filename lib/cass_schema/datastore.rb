@@ -4,6 +4,9 @@ require 'active_support/core_ext/hash'
 require 'active_support/core_ext/object'
 
 module CassSchema
+  # A struct representing a Cassandra cluster.
+  # @param [Array<String>] A list of hosts defining the cluster
+  # @param [Integer] the port to use for the cluster
   Cluster = Struct.new(:hosts, :port) do
     def self.build(hash)
       l = hash.with_indifferent_access
