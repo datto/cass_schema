@@ -11,9 +11,23 @@ module CassSchema
     end
   end
 
+  # A struct representing a datastore, composed of the following fields:
+  # @param [String] name of the datastore
+  # @param [CassSchema::Cluster] A list of hosts and a port representing the cluster.
+  # @param [String] keyspace
+  # @param [String] A string defining the options with which the keyspace should be created, e.g.:
+  # "{ 'class' : 'SimpleStrategy', 'replication_factor' : 3 }"
+  # @param [String] The name of the schema directory within the cass_schema directory, typically the same as the name.
+  # statements are separated by two new lines, and a statement cannot have two newlines inside of it
+  # comments start with '#'
   DataStore = Struct.new(:name, :cluster, :keyspace, :replication, :schema) do
 
     # Creates a datastore object from a hash containing the required keys
+    # @param [String] name of the data store
+    # @option [CassSchema::Cluster] :cluster
+    # @option [String] :schema, defines the schema directory used. Sefaults to the name if not given.
+    # @option [String] :keyspace
+    # @option [String] :replication
     def self.build(name, hash)
       l = hash.with_indifferent_access
       schema = l[:schema] || name
