@@ -26,9 +26,9 @@ namespace :cass do
     end
 
     desc "Run the specified cassandra schema migration for the specified datastore"
-    task :create, [:datastore, :migration] => :environment do |t, args|
+    task :migrate, [:datastore, :migration] => :environment do |t, args|
       raise ArgumentError.new('datastore argument required') unless args[:datastore]
-      raise ArgumentError.new('datastore argument required') unless args[:migration]
+      raise ArgumentError.new('migration argument required') unless args[:migration]
       CassSchema::Runner.migrate(args[:datastore], args[:migration])
     end
   end
