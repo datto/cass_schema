@@ -12,7 +12,7 @@ module CassSchema
       l = hash.with_indifferent_access
       new(l[:hosts], l[:port])
     end
-  end
+  end if !defined?(Cluster)
 
   # A struct representing a datastore, composed of the following fields:
   # @param [String] name of the datastore
@@ -93,7 +93,7 @@ module CassSchema
     def log(msg, level = :info)
       Runner.logger.try { |l| l.send(level, msg) }
     end
-  end
+  end if !defined?(Datastore)
 
   class StatementLoader
     class << self
