@@ -13,3 +13,5 @@ group :test do
   gem 'minitest_should', :git => 'git@github.com:citrus/minitest_should.git'
   gem "mocha"
 end
+
+gem 'cassandra-driver', :git => 'git@github.com:datastax/ruby-driver.git', :tag => 'v2.0.1'
