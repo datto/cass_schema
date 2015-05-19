@@ -93,7 +93,7 @@ module CassSchema
     def log(msg, level = :info)
       Runner.logger.try { |l| l.send(level, msg) }
     end
-  end if !defined?(Datastore)
+  end if !defined?(DataStore)
 
   class StatementLoader
     class << self
