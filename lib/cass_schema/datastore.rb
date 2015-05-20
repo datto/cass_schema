@@ -69,6 +69,8 @@ module CassSchema
     def run_statement(statement, client)
       log("CassSchema: #{statement}")
       client.execute(statement)
+    rescue Cassandra::Errors::ConfigurationError
+      # Special case if we cannot create/drop the keyspace, do nothing
     rescue => e
       log(e, :error)
       raise SchemaError.create(e, statement)
