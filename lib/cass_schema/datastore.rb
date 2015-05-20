@@ -83,11 +83,11 @@ module CassSchema
     end
 
     def create_keyspace
-      "CREATE KEYSPACE IF NOT EXISTS #{keyspace} with replication = #{replication}"
+      "CREATE KEYSPACE #{keyspace} with replication = #{replication}"
     end
 
     def drop_keyspace
-      "DROP KEYSPACE IF EXISTS #{keyspace}"
+      "DROP KEYSPACE #{keyspace}"
     end
 
     def log(msg, level = :info)
