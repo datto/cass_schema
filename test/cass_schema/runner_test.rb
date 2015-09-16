@@ -10,7 +10,7 @@ module CassSchema
     end
 
     teardown do
-      Runner.drop_all
+      Runner.drop_all unless @dont_drop_on_teardown
     end
 
     def tables_for_keyspace(keyspace)
@@ -107,6 +107,26 @@ module CassSchema
         column = schema.find { |col| col['column_name'] == 'new_column'}
         assert column
         assert_equal 'org.apache.cassandra.db.marshal.Int32Type', column['validator']
+      end
+    end
+
+    context 'disallowing drops' do
+      setup do
+        Runner.setup(datastores: YamlHelper.datastores(File.join(@base_path, 'test_config.yml')),
+                     schema_base_path: @base_path,
+                     disallow_drops: true
+                    )
+
+        @dont_drop_on_teardown = true
+
+      end
+
+      should 'disallow drop_all if :disallow_drops is set' do
+        assert_raises(CassSchema::Runner::DropCommandsNotAllowed) { Runner.drop_all }
+      end
+
+      should 'disallow drop if :disallow_drops is set' do
+        assert_raises(CassSchema::Runner::DropCommandsNotAllowed) { Runner.drop('test_keyspace') }
       end
     end
   end
