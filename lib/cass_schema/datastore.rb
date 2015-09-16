@@ -52,17 +52,11 @@ module CassSchema
     private
 
     def client
-      @client ||= begin
-                    cl = Cassandra.cluster(:hosts => cluster.hosts, :port => cluster.port)
-                    cl.connect(keyspace)
-                  end
+      @client ||= cluster.connection.connect(keyspace)
     end
 
     def general_client
-      @general_client ||= begin
-                            cl = Cassandra.cluster(:hosts => cluster.hosts, :port => cluster.port)
-                            cl.connect
-                          end
+      @general_client ||= cluster.connection.connect
     end
 
     def run_statement(statement, client)
