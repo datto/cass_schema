@@ -106,6 +106,17 @@ datastores = [
 Runner.setup(datastores: datastores, schema_base_path: 'my/base/path')
 ```
 
+This allows CassSchema to be integrated into other configuration schemes more easily.
+
+Additionally, the global `CassSchema::Runner` object need not be used: An instance of `CassSchema::Runner` can be
+constructed and used in the same manner as the global object:
+
+```ruby
+# Accepts the same arguments as Runner#setup
+runner = Runner.new(datastores: datastores, schema_base_path: 'my/base/path')
+runner.create_all
+```
+
 
 ## Contributing
 

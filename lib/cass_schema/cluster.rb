@@ -8,7 +8,7 @@ module CassSchema
       l = hash.with_indifferent_access
 
       if l[:hosts]
-        l[:connection] ||= Cassandra.cluster(:hosts => l[:hosts], :port => l[:port])
+        l[:connection] ||= Cassandra.cluster(hosts: l[:hosts], port: l[:port])
       end
 
       new(l[:connection])

@@ -5,8 +5,8 @@ module CassSchema
 
     setup do
       @base_path = "#{File.dirname(__FILE__)}/../fixtures"
-      Runner.setup(:datastores => YamlHelper.datastores(File.join(@base_path, 'test_config.yml')),
-                   :schema_base_path => @base_path)
+      Runner.setup(datastores: YamlHelper.datastores(File.join(@base_path, 'test_config.yml')),
+                   schema_base_path: @base_path)
     end
 
     teardown do
