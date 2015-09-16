@@ -25,8 +25,9 @@ Or install it yourself as:
 Before usage, CassSchema must be initialized with a set of datastore objects, as well as a base directory where the schema definitions live:
 
 ```ruby
-CassSchema::Runner.datastores = CassSchema::YamlHelper.datastores('my/path/to/config.yml')
-CassSchema::Runner.schema_base_path = 'my/path/to/schema/root'
+CassSchema::Runner.initialize(
+  datastores: CassSchema::YamlHelper.datastores('my/path/to/config.yml'),
+  schema_base_path: 'my/path/to/schema/root')
 ```
 
 Here the datastores are a list of `CassSchema::DataStore` objects. These may be build manually, or loaded from a yaml file using the `CassSchema::YamlHelper`. CassSchema is intentionally agnostic about the source of these datastores.
@@ -89,6 +90,22 @@ CassSchema::Runner.migrate('datastore', 'migration')
 ```
 
 Here the migration file 'migration.cql' should exist.
+
+### Integration with other libraries
+
+While `CassSchema::YamlLoader` provides ease of use, it is not required: the runner can be instantiated
+with any list of `CassSchema::Datastore` objects. Here is an example manual set up:
+
+```ruby
+cluster = CassSchema::Cluster.build(hosts: ['127.0.0.1'], port: 9242)
+replication = "{ 'class' : 'SimpleStrategy', 'replication_factor' : 1 }"
+datastores = [
+  CassSchema::Datastore.build('test_datastore', cluster: cluster, keyspace: 'test_keyspace', replication: replication),
+  CassSchema::Datastore.build('test_datastore2', cluster: cluster, keyspace: 'test_keyspace2', replication: replication),
+]
+Runner.setup(datastores: datastores, schema_base_path: 'my/base/path')
+```
+
 
 ## Contributing
 
