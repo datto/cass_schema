@@ -1,19 +1,10 @@
-require_relative 'runner'
 require_relative 'errors'
+require_relative 'statement_loader'
+require_relative 'cluster'
 require 'active_support/core_ext/hash'
 require 'active_support/core_ext/object'
 
 module CassSchema
-  # A struct representing a Cassandra cluster.
-  # @param [Array<String>] A list of hosts defining the cluster
-  # @param [Integer] the port to use for the cluster
-  Cluster = Struct.new(:hosts, :port) do
-    def self.build(hash)
-      l = hash.with_indifferent_access
-      new(l[:hosts], l[:port])
-    end
-  end if !defined?(Cluster)
-
   # A struct representing a datastore, composed of the following fields:
   # @param [String] name of the datastore
   # @param [CassSchema::Cluster] A list of hosts and a port representing the cluster.
@@ -25,6 +16,8 @@ module CassSchema
   # comments start with '#'
   DataStore = Struct.new(:name, :cluster, :keyspace, :replication, :schema) do
 
+    attr_reader :schema_base_path, :logger
+
     # Creates a datastore object from a hash containing the required keys
     # @param [String] name of the data store
     # @option [CassSchema::Cluster] :cluster
@@ -35,6 +28,12 @@ module CassSchema
       l = hash.with_indifferent_access
       schema = l[:schema] || name
       new(name, l[:cluster], l[:keyspace], l[:replication], schema)
+    end
+
+    # Populates the Datastore with state from the Runner.
+    def setup(options = {})
+      @schema_base_path = options[:schema_base_path]
+      @logger = options[:logger]
     end
 
     def create
@@ -77,11 +76,11 @@ module CassSchema
     end
 
     def create_statements
-      StatementLoader.statements(schema, 'schema.cql')
+      StatementLoader.statements(schema_base_path, schema, 'schema.cql')
     end
 
     def migration_statements(migration_name)
-      StatementLoader.statements(schema, 'migrations', "#{migration_name}.cql")
+      StatementLoader.statements(schema_base_path, schema, 'migrations', "#{migration_name}.cql")
     end
 
     def create_keyspace
@@ -93,34 +92,7 @@ module CassSchema
     end
 
     def log(msg, level = :info)
-      Runner.logger.try { |l| l.send(level, msg) }
+      logger.try { |l| l.send(level, msg) }
     end
   end if !defined?(DataStore)
-
-  class StatementLoader
-    class << self
-      def path_for_schema(schema)
-        File.join(Runner.schema_base_path, schema)
-      end
-
-      def statements(schema, *path_parts)
-        file_path = File.join(path_for_schema(schema), path_parts)
-        file = File.open(file_path).read
-
-        # Parse the individual CQL statements as a list from the file. To do so:
-        # - assume statements are separated by two new lines
-        # - strip comments and empty lines from each statement
-        # - remove statements that are empty
-        statements = file.split(/\n{2,}/).map do |statement|
-          statement
-            .split(/\n/)
-            .select { |l| l !~ /^\s*#/ }
-            .select { |l| l !~ /^\s*$/ }
-            .join("\n")
-        end
-
-        statements.select { |s| s.length > 0 }
-      end
-    end
-  end
 end
