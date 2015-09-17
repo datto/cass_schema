@@ -4,9 +4,9 @@ module CassSchema
   class RunnerTest < MiniTest::Should::TestCase
 
     setup do
-      base_path = "#{File.dirname(__FILE__)}/../fixtures"
-      Runner.datastores = YamlHelper.datastores(File.join(base_path, 'test_config.yml'))
-      Runner.schema_base_path = base_path
+      @base_path = "#{File.dirname(__FILE__)}/../fixtures"
+      Runner.setup(datastores: YamlHelper.datastores(File.join(@base_path, 'test_config.yml')),
+                   schema_base_path: @base_path)
     end
 
     teardown do
@@ -79,6 +79,34 @@ module CassSchema
 
       should 'raise an error if a datastore does not exist' do
         assert_raises(ArgumentError) { Runner.create('nonexistent_datastore') }
+      end
+    end
+
+    context 'custom setup' do
+      setup do
+        connection = Cassandra.cluster(hosts: %w(127.0.0.1), port: 9242)
+        cluster = Cluster.build(connection: connection)
+        datastores = [DataStore.build('test_datastore',
+                                      cluster: cluster,
+                                      keyspace: 'test_keyspace',
+                                      replication: "{ 'class' : 'SimpleStrategy', 'replication_factor' : 1 }")]
+        @runner = Runner.new(datastores: datastores, schema_base_path: @base_path )
+      end
+
+      should 'be able to create a datastore' do
+        @runner.create('test_datastore')
+        tables = tables_for_keyspace('test_keyspace')
+        assert_equal %w(test test2).to_set, tables.map { |t| t['columnfamily_name'] }.to_set
+      end
+
+      should 'be able to run a migration' do
+        @runner.create('test_datastore')
+        @runner.migrate('test_datastore', 'migration')
+        schema = schema_for_table('test_datastore', 'test')
+
+        column = schema.find { |col| col['column_name'] == 'new_column'}
+        assert column
+        assert_equal 'org.apache.cassandra.db.marshal.Int32Type', column['validator']
       end
     end
   end

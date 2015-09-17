@@ -1,55 +1,71 @@
-require 'cassandra'
-
 module CassSchema
   class Runner
+    attr_reader :datastores, :schema_base_path, :logger, :cluster_builder
+
+    # Create a new Runner
+    # @option options [Array<CassSchema::Datastore>] :datastores - The list of datastore objects for which schemas
+    #    will be managed.
+    # @option options [String] :schema_bath_path - The directory where schema definitions live. In a rails env,
+    #   this defaults to <rails root>/cass_schema.
+    # @option options [#info|#error] :logger optional logger to use when creating schemas
+    def initialize(options = {})
+      options[:schema_base_path] ||= defined?(::Rails) ? File.join(::Rails.root, 'cass_schema') : nil
+
+      @datastores = options[:datastores]
+      @schema_base_path = options[:schema_base_path]
+      @logger = options[:logger]
+
+      raise ":datastores is a required argument!" unless @datastores
+
+      @datastores.each { |ds| ds.setup(options) }
+    end
+
+    # Create all schemas for all datastores
+    def create_all
+      datastores.each { |d| d.create }
+    end
+
+    # Drop all schemas for all datastores
+    def drop_all
+      datastores.each { |d| d.drop }
+    end
+
+    # Create the schema for a particular datastore
+    # @param [String] datastore_name
+    def create(datastore_name)
+      datastore_lookup(datastore_name).create
+    end
+
+    # Drop the schema for a particular datastore
+    # @param [String] datastore_name
+    def drop(datastore_name)
+      datastore_lookup(datastore_name).drop
+    end
+
+    # Run a particular named migration for a datastore
+    # @param [String] datastore_name
+    # @param [String] migration_name
+    def migrate(datastore_name, migration_name)
+      datastore_lookup(datastore_name).migrate(migration_name)
+    end
+
+    def datastore_lookup(datastore_name)
+      @datastore_lookup ||= Hash[datastores.map { |ds| [ds.name, ds] }]
+      @datastore_lookup[datastore_name] || (raise ArgumentError.new("CassSchema datastore #{datastore_name} not found"))
+    end
+
+    # The class methods for Runner are the same as the instance methods, which delegate to a singleton. To set up the
+    # singleton, call Runner#setup.
     class << self
-      attr_writer :datastores
-      attr_writer :schema_base_path
-      attr_accessor :logger
-
-      # Create all schemas for all datastores
-      def create_all
-        datastores.each { |d| d.create }
+      # (see Runner#initialize)
+      def setup(options = {})
+        @runner = Runner.new(options)
       end
 
-      # Drop all schemas for all datastores
-      def drop_all
-        datastores.each { |d| d.drop }
-      end
-
-      # Create the schema for a particular datastore
-      # @param [String] datastore_name
-      def create(datastore_name)
-        datastore_lookup(datastore_name).create
-      end
-
-      # Drop the schema for a particular datastore
-      # @param [String] datastore_name
-      def drop(datastore_name)
-        datastore_lookup(datastore_name).drop
-      end
-
-      # Run a particular named migration for a datastore
-      # @param [String] datastore_name
-      # @param [String] migration_name
-      def migrate(datastore_name, migration_name)
-        datastore_lookup(datastore_name).migrate(migration_name)
-      end
-
-      def schema_base_path
-        @schema_base_path ||= defined?(::Rails) ? File.join(::Rails.root, 'cass_schema') : nil
-      end
-
-      def datastore_lookup(datastore_name)
-        @datastore_lookup ||= Hash[datastores.map { |ds| [ds.name, ds] }]
-        @datastore_lookup[datastore_name] || (raise ArgumentError.new("CassSchema datastore #{datastore_name} not found"))
-      end
-
-      private
-
-      def datastores
-        raise "CassSchema::Runner.datastores must be initialized to a list of CassSchema::DataStore objects!" unless @datastores
-        @datastores
+      (Runner.instance_methods - Object.instance_methods).each do |method|
+        define_method(method) do |*args|
+          @runner.send(method, *args)
+        end
       end
     end
   end
