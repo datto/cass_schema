@@ -9,7 +9,7 @@ CassSchema operations apply to multiple 'datastores'. A datastore is a cluster, 
 Add this line to your application's Gemfile:
 
 ```ruby
-gem 'cass_schema'
+gem 'cass_schema', github: 'backupify/cass_schema'
 ```
 
 And then execute:
