@@ -27,7 +27,7 @@ module CassSchema
 
       raise ":datastores is a required argument!" unless @datastores
 
-      @datastores.each { |ds| ds.setup(options) }
+      @datastores.each { |ds| ds._setup(options) }
     end
 
     # Create all schemas for all datastores

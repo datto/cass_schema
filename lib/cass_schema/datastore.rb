@@ -30,34 +30,42 @@ module CassSchema
       new(name, l[:cluster], l[:keyspace], l[:replication], schema)
     end
 
-    # Populates the Datastore with state from the Runner.
-    def setup(options = {})
-      @schema_base_path = options[:schema_base_path]
-      @logger = options[:logger]
-    end
-
+    # Creates the datastore
     def create
       run_statement(create_keyspace, general_client)
       create_statements.each { |statement| run_statement(statement, client) }
     end
 
+    # Drops the datastore
     def drop
       run_statement(drop_keyspace, general_client)
     end
 
+    # Runs a given migration for this datastore
+    # @param migration_name [String] the name of the migration
     def migrate(migration_name)
       migration_statements(migration_name).each { |statement| run_statement(statement, client) }
     end
 
-    private
-
+    # A Cassava client connected to the cluster and keyspace with which this datastore is associated
+    # @return [Cassava::Client]
     def client
       @client ||= cluster.connection.connect(keyspace)
     end
 
+    # A Cassava client connected to the cluster with which this datastore is associated
+    # @return [Cassava::Client]
     def general_client
       @general_client ||= cluster.connection.connect
     end
+
+    # Internal method used by Runner to pass state into the datastore
+    def _setup(options = {})
+      @schema_base_path = options[:schema_base_path]
+      @logger = options[:logger]
+    end
+
+    private
 
     def run_statement(statement, client)
       log("CassSchema: #{statement}")
