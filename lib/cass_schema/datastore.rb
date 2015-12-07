@@ -48,13 +48,13 @@ module CassSchema
     end
 
     # A Cassava client connected to the cluster and keyspace with which this datastore is associated
-    # @return [Cassava::Client]
+    # @return [Cassandra::Session]
     def client
       @client ||= cluster.connection.connect(keyspace)
     end
 
     # A Cassava client connected to the cluster with which this datastore is associated
-    # @return [Cassava::Client]
+    # @return [Cassandra::Session]
     def general_client
       @general_client ||= cluster.connection.connect
     end
