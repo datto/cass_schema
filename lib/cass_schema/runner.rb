@@ -61,9 +61,12 @@ module CassSchema
       datastore_lookup(datastore_name).migrate(migration_name)
     end
 
+    # Find a datastore based on the datastore name
+    # @param datastore_name [String|Symbol] The datastore name
+    # @return [CassSchema::Datastore]
     def datastore_lookup(datastore_name)
       @datastore_lookup ||= Hash[datastores.map { |ds| [ds.name, ds] }]
-      @datastore_lookup[datastore_name] || (raise ArgumentError.new("CassSchema datastore #{datastore_name} not found"))
+      @datastore_lookup[datastore_name.to_s] || (raise ArgumentError.new("CassSchema datastore #{datastore_name} not found"))
     end
 
     # The class methods for Runner are the same as the instance methods, which delegate to a singleton. To set up the
